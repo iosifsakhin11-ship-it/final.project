@@ -1,0 +1,11 @@
+fastapi
+uvicorn
+sqlmodel
+PyMySQL
+python-dotenv
+bcrypt
+fastapi-mail
+apscheduler
+python-multipart
+pydantic
+sqlalchemy

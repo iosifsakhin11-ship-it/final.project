@@ -1,0 +1,102 @@
+# HomeFinder API Documentation - Routes Structure
+
+This document outlines the API endpoints for the HomeFinder system, grouped by functional module.
+
+---
+
+## 1. Authentication & User Profile
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/users` | POST | Public | Register a new user account | `users`, `audit_logs` |
+| `/login` | POST | Public | Authenticate user and initiate 2FA (OTP via email) | `users`, `two_factor_tokens`, `audit_logs` |
+| `/verify-otp` | POST | Public | Verify OTP and create an active session | `users`, `two_factor_tokens`, `user_sessions`, `audit_logs` |
+| `/logout` | POST | Authenticated | Revoke the active session | `user_sessions`, `audit_logs` |
+| `/users/me` | GET | Authenticated | Retrieve current user profile details | `users` |
+| `/users/me` | PATCH | Authenticated | Update current user profile (username/email) | `users`, `audit_logs` |
+| `/users/me/change-password` | POST | Authenticated | Change user password securely | `users`, `audit_logs` |
+
+---
+
+## 2. Property Listings
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/listings` | GET | Public | Browse and filter property listings | `listings` |
+| `/listings/{listing_id}` | GET | Public | View full details of a specific property | `listings` |
+| `/listings` | POST | User/Owner | Create a new property listing | `listings`, `audit_logs` |
+| `/listings/{listing_id}` | PATCH | Owner | Update property details (Price, status, etc.) | `listings`, `audit_logs` |
+| `/listings/{listing_id}` | DELETE | Owner | Remove a property listing from the platform | `listings`, `audit_logs` |
+| `/upload-image` | POST | User/Owner | Upload property photos | `audit_logs` |
+
+---
+
+## 3. Interactions (Favorites & Subscriptions)
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/favorites` | GET | Authenticated | List all properties saved by the user | `user_favorites` |
+| `/favorites` | POST | Authenticated | Save a property to favorites | `user_favorites`, `audit_logs` |
+| `/favorites/{listing_id}` | DELETE | Authenticated | Remove a property from favorites | `user_favorites`, `audit_logs` |
+| `/subscriptions/me` | GET | Authenticated | List user's automated listing alerts | `listing_subscriptions` |
+| `/subscriptions` | POST | Authenticated | Create a subscription for listing alerts | `listing_subscriptions`, `audit_logs` |
+| `/subscriptions/{sub_id}` | DELETE | Authenticated | Delete a listing alert subscription | `listing_subscriptions`, `audit_logs` |
+
+---
+
+## 4. Communication (Chats & Messages)
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/chats` | GET | Authenticated | List all active chat threads for the user | `chats`, `messages` |
+| `/chats/{chat_id}` | GET | Authenticated | Retrieve full message history of a chat | `chats`, `messages` |
+| `/messages` | POST | Authenticated | Send a message (auto-creates chat for new inquiries) | `chats`, `messages`, `audit_logs` |
+
+---
+
+## 5. Bids & Offers
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/bids/me` | GET | Authenticated | List all bids placed by the user | `bids` |
+| `/bids` | POST | Authenticated | Submit a formal bid/offer on a property | `bids`, `chats`, `messages`, `audit_logs` |
+| `/bids/{bid_id}/respond`| PATCH | Owner | Accept or Reject a pending bid | `bids`, `listings`, `payments`, `audit_logs` |
+| `/bids/{bid_id}/cancel` | PATCH | Bidder | Withdraw a pending bid | `bids`, `audit_logs` |
+| `/listings/{id}/bids` | GET | Owner | View all bids received for a listing | `bids`, `listings` |
+
+---
+
+## 6. Viewings
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/viewings/me` | GET | Authenticated | List all viewing requests made by the user | `viewings` |
+| `/viewings` | POST | Authenticated | Request a physical property viewing | `viewings`, `chats`, `messages`, `audit_logs` |
+| `/viewings/{id}/respond`| PATCH | Owner | Confirm or Decline a viewing request | `viewings`, `chats`, `messages`, `audit_logs` |
+| `/viewings/{id}/cancel` | PATCH | Requester | Cancel a planned viewing | `viewings`, `audit_logs` |
+| `/listings/{id}/viewings`| GET | Owner | View all viewing requests for a listing | `viewings`, `listings` |
+
+---
+
+## 7. Payments
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/payments/me` | GET | Authenticated | View user's transaction history | `payment_records` |
+| `/payments/{payment_id}`| GET | Authenticated | View specific payment details and reference | `payment_records` |
+
+---
+
+## 8. Reports & Analytics (Supervisor+)
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/reports/inquiries` | GET | Supervisor | Monthly report on chat, bid, and viewing activity| `messages`, `bids`, `viewings` |
+| `/reports/saved-listings`| GET | Supervisor | Report on most favorited properties | `user_favorites`, `listings` |
+| `/reports/search-trends` | GET | Supervisor | Analysis of user search filters and preferences | `audit_logs` |
+
+---
+
+## 9. Administrative Management (Admin Only)
+| Route | Method | Access | Description | Affected Tables |
+|:------|:-------|:-------|:------------|:----------------|
+| `/admin/users` | GET | Admin | List and filter all system users | `users` |
+| `/admin/users/{id}` | PATCH | Admin | Update any user account (e.g., Ban, Verify) | `users`, `audit_logs` |
+| `/admin/users/{id}` | DELETE | Admin | Permanently delete a user account | `users`, `audit_logs` |
+| `/admin/listings` | GET | Admin | Manage all property listings across the platform | `listings` |
+| `/admin/listings/{id}` | PATCH | Admin | Force update any listing details | `listings`, `audit_logs` |
+| `/admin/listings/{id}` | DELETE | Admin | Remove any listing | `listings`, `audit_logs` |
+| `/admin/payments` | GET | Admin | View all system-wide payments | `payment_records` |
+| `/admin/payments/{id}` | PATCH | Admin | Manually update payment status/references | `payment_records`, `audit_logs` |
